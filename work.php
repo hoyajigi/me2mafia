@@ -1,0 +1,49 @@
+<?
+	include_once("lib.php");
+	$do=isset($_GET["do"])?$_GET["do"]:0;
+	if($state==0){
+		if(count_all()>=$LEAST||$do==1){
+			$state=1;
+			update_state();
+			post_startgame();
+			choose_mafia();
+			notice_mafia();
+		}
+	}
+	else if($state==1){
+		$state=2;
+		update_state();
+		post_day();
+	}
+	else if($state==2){
+		if(time()-$lasttime>=60*5||countvote()>=count_all()||$do==1){
+			$state=3;
+			post_day_kill();
+			if(!if_keep_game()){
+				$state=9;
+			}
+			else{
+				post_night();
+			}
+			update_state();
+		}
+	}
+	else if($state==3){
+		if(time()-$lasttime>=60*3||countvote>=count_mafia()||$do==1){
+			$state=2;
+			post_night_kill();
+			if(!if_keep_game()){
+				$state=9;
+			}
+			else{
+				post_day();
+			}
+			update_state();
+		}
+	}
+	else if($state==9){
+		post_gamemake();
+		$state=0;
+		update_state();
+	}
+?>
